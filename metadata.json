@@ -1,0 +1,5 @@
+{
+  "name": "Gen-62",
+  "description": "A classic, dark-themed AI chat interface for custom Ollama endpoints via Cloudflare tunnels.",
+  "requestFramePermissions": []
+}
