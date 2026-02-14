@@ -1,0 +1,117 @@
+<div class="flex h-full w-full relative overflow-hidden bg-white dark:bg-gptDark text-black dark:text-gray-100 font-sans transition-colors duration-300">
+  
+  <!-- Modals -->
+  @if (ollamaService.isSearchOpen()) { <app-search-modal></app-search-modal> }
+  @if (ollamaService.isGensOpen()) { <app-gens-modal></app-gens-modal> }
+  @if (ollamaService.isSettingsOpen()) { <app-settings-modal></app-settings-modal> }
+
+  <!-- STEP 1: Config Modal Overlay (Dark Mode Forced) -->
+  @if (!hasConfiguredUrl()) {
+    <div class="absolute inset-0 z-[60] bg-[#121212] flex items-center justify-center p-4">
+      <app-url-config></app-url-config>
+    </div>
+  }
+
+  <!-- STEP 2: Login Screen (Dark Mode Forced) -->
+  @if (hasConfiguredUrl() && !isLoggedIn()) {
+    <div class="absolute inset-0 z-[60] bg-[#121212] flex items-center justify-center p-4">
+        <app-login></app-login>
+    </div>
+  }
+
+  <!-- STEP 3: Main Application Content -->
+  @if (hasConfiguredUrl() && isLoggedIn()) {
+    <div class="flex h-full w-full animate-app-expand origin-center">
+        
+        <!-- Mobile Sidebar Overlay -->
+        @if (isSidebarOpen()) {
+          <div 
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ease-in-out"
+            (click)="toggleSidebar()"
+          ></div>
+        }
+
+        <!-- Sidebar Container -->
+        <div 
+            class="fixed md:relative z-50 h-full bg-[#f9f9f9] dark:bg-black border-r border-zinc-200 dark:border-white/10 flex-shrink-0
+                   transition-transform duration-500 cubic-bezier(0.2, 0, 0, 1)"
+            [style.width.px]="260"
+            [class.-translate-x-full]="!isSidebarOpen()"
+            [class.translate-x-0]="isSidebarOpen()"
+            [class.md:translate-x-0]="isSidebarOpen()"
+            [class.md:-translate-x-[260px]]="!isSidebarOpen()"
+            [class.md:mr-[-260px]]="!isSidebarOpen()"
+        >
+            <div class="w-full h-full overflow-hidden">
+               <app-sidebar></app-sidebar>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col h-full relative min-w-0 bg-white dark:bg-gptDark">
+            
+            <!-- Top Bar -->
+            <div class="sticky top-0 z-30 flex items-center p-3 pl-4 text-zinc-500 dark:text-gray-400 bg-white/95 dark:bg-gptDark/95 backdrop-blur">
+                
+                <!-- Hamburger -->
+                <button 
+                  (click)="toggleSidebar()" 
+                  class="group relative w-10 h-10 rounded-lg flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-[#1c1c1c] active:scale-95 transition-all outline-none"
+                  title="Menu"
+                >
+                   <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-zinc-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+
+                <!-- App Name -->
+                <div 
+                    class="ml-3 font-wet text-[22px] tracking-wide text-black dark:text-white select-none transition-all duration-700 ease-out"
+                    [class.opacity-0]="ollamaService.isNewChat()"
+                    [class.translate-y-2]="ollamaService.isNewChat()"
+                    [class.opacity-100]="!ollamaService.isNewChat()"
+                    [class.translate-y-0]="!ollamaService.isNewChat()"
+                >
+                  Gen-62
+                </div>
+                
+                <div class="flex-1"></div>
+
+                <!-- Fullscreen Toggle -->
+                <button 
+                    (click)="toggleFullscreen()"
+                    class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-[#2f2f2f] text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                    title="Fullscreen"
+                >
+                    @if (!isFullscreen()) {
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    } @else {
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                    }
+                </button>
+            </div>
+
+            <!-- Chat Content -->
+            <app-chat-interface class="flex-1 flex flex-col h-full overflow-hidden relative"></app-chat-interface>
+
+        </div>
+    </div>
+  }
+</div>
+
+<style>
+.animate-app-expand {
+    animation: appExpand 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes appExpand {
+    0% {
+        opacity: 1;
+        transform: scale(0.25);
+        border-radius: 100px;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        border-radius: 0px;
+    }
+}
+</style>
